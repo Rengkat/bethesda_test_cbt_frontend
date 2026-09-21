@@ -15,7 +15,7 @@ async function loadResults() {
 
   try {
     const res = await fetch(
-      "https://bethesda-cbt-studet-project.onrender.com /api/admin/results",
+      "https://bethesda-cbt-studet-project.onrender.com/api/admin/results",
       {
         method: "GET",
         headers: {

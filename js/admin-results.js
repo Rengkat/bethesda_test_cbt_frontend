@@ -4,13 +4,125 @@
 // Find the area where results will be shown
 const resultsArea = document.getElementById("resultsArea");
 
-
 // ============================================================
 // PART 1: A function that loads and displays every result
 // ============================================================
 
 // 1. Define an "async function" called loadResults that takes no parameters.
 
+async function loadResults() {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(
+      "https://bethesda-cbt-studet-project.onrender.com/api/admin/results",
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const results = await res.json();
+
+    if (!res.ok) {
+      resultsArea.textContent = results.message || "could not load results";
+      return;
+    }
+
+    if (!results.length === 0) {
+      resultsArea.textContent = results.message || "no results yet";
+      return;
+    }
+
+    const table = document.createElement("table");
+
+    const caption = document.createElement("caption");
+
+    caption.textContent = "All submitted exam results";
+
+    table.appendChild(caption);
+
+    const thead = document.createElement("thead");
+
+    const headerRow = document.createElement("tr");
+
+    const columnNames = [
+      "Student",
+      "Reg.no",
+      "Class",
+      "Exam",
+      "Subject",
+      "Score",
+      "Submitted",
+    ];
+
+    for (let i = 0; i < columnNames.length; i++) {
+      const th = document.createElement("th");
+
+      th.setAttribute("scope", "col");
+
+      th.textContent = columnNames[i];
+
+      headerRow.appendChild(th);
+    }
+
+    thead.appendChild(headerRow);
+
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    for (let i = 0; i < results.length; i++) {
+      let result = results[i];
+
+      const studentName = result.student ? result.student.fullName : "unknown";
+
+      const regNumber = result.student ? result.student.regNumber : " ";
+
+      const studentClass = result.student ? result.student.studentClass : " ";
+
+      const examTitle = result.exam ? result.exam.title : "deleted exam";
+
+      const examSubject = result.exam ? result.exam.subject : " ";
+
+      const date = new Date(result.submittedAt).toLocaleString();
+
+      const tr = document.createElement("tr");
+
+      const cellValues = [
+        studentName,
+        regNumber,
+        studentClass,
+        examTitle,
+        examSubject,
+        `${result.score} out of ${result.totalQuestions}`,
+        date,
+      ];
+
+      for (let i = 0; i < cellValues.length; i++) {
+        const td = document.createElement("td");
+
+        td.textContent = cellValues[i];
+
+        tr.appendChild(td);
+      }
+
+      tbody.appendChild(tr);
+    }
+
+    table.appendChild(tbody);
+
+    resultsArea.innerHTML = "";
+
+    resultsArea.appendChild(table);
+  } catch (error) {
+    resultsArea.textContent = "Could not reach the server, please try again.";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadResults);
 // Inside loadResults, do the following, IN THIS ORDER:
 
 // a. Read the saved login token out of local storage
@@ -116,10 +228,11 @@ const resultsArea = document.getElementById("resultsArea");
 //    Inside it, set resultsArea.textContent to
 //    "Could not reach the server. Please try again."
 
-
 // ============================================================
 // PART 2: Load the results as soon as the page opens
 // ============================================================
 
 // 2. Call loadResults() one time, on its own, at the very bottom of the
 //    file, so the table is filled in as soon as this page loads.
+
+loadResults();
